@@ -1,4 +1,4 @@
-//**
+/**
  * Gate List Component
  */
 
