@@ -98,7 +98,7 @@ export default async function PromptsPage() {
       case 'draft':
         return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" /> Draft</Badge>;
       case 'pending_review':
-        return <Badge variant="warning"><Eye className="h-3 w-3 mr-1" /> Pending Review</Badge>;
+        return <Badge className="bg-yellow-500"><Eye className="h-3 w-3 mr-1" /> Pending Review</Badge>;
       case 'rejected':
         return <Badge variant="destructive"><AlertCircle className="h-3 w-3 mr-1" /> Rejected</Badge>;
       case 'archived':
