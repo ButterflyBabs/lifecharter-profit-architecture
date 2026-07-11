@@ -160,7 +160,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       });
 
       // Check for gates
-      const detectedGates = checkCriticalGates(financialData);
+      const detectedGates = checkCriticalGates(financialData as FinancialData & Record<string, unknown>);
 
       // Create gates that don't already exist
       const createdGates = [];
