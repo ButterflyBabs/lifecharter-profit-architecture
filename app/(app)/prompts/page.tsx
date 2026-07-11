@@ -41,6 +41,23 @@ const categoryLabels: Record<string, string> = {
   advisory: 'Advisory',
 };
 
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case 'active':
+      return <Badge className="bg-green-500"><CheckCircle className="h-3 w-3 mr-1" /> Active</Badge>;
+    case 'draft':
+      return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" /> Draft</Badge>;
+    case 'pending_review':
+      return <Badge className="bg-yellow-500"><Eye className="h-3 w-3 mr-1" /> Pending Review</Badge>;
+    case 'rejected':
+      return <Badge variant="destructive"><AlertCircle className="h-3 w-3 mr-1" /> Rejected</Badge>;
+    case 'archived':
+      return <Badge variant="outline">Archived</Badge>;
+    default:
+      return <Badge variant="secondary">{status}</Badge>;
+  }
+};
+
 export default async function PromptsPage() {
   const supabase = createClient();
   
@@ -90,23 +107,6 @@ export default async function PromptsPage() {
     acc[category].push(prompt);
     return acc;
   }, {});
-  
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-500"><CheckCircle className="h-3 w-3 mr-1" /> Active</Badge>;
-      case 'draft':
-        return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" /> Draft</Badge>;
-      case 'pending_review':
-        return <Badge className="bg-yellow-500"><Eye className="h-3 w-3 mr-1" /> Pending Review</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive"><AlertCircle className="h-3 w-3 mr-1" /> Rejected</Badge>;
-      case 'archived':
-        return <Badge variant="outline">Archived</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
-  };
   
   return (
     <div className="container mx-auto py-8">
