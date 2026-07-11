@@ -48,7 +48,7 @@ export function PromptEditor({
       case 'draft':
         return <Badge variant="secondary">Draft</Badge>;
       case 'pending_review':
-        return <Badge variant="warning">Pending Review</Badge>;
+        return <Badge className="bg-yellow-500 hover:bg-yellow-600">Pending Review</Badge>;
       case 'rejected':
         return <Badge variant="destructive">Rejected</Badge>;
       case 'archived':

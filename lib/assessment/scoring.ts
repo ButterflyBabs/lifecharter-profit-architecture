@@ -18,7 +18,7 @@ export interface IndicatorScore {
   evidenceCount: number;
 }
 
-export interface ComponentScore {
+export interface CalculatedComponentScore {
   componentId: string;
   componentCode: string;
   rawScore: number | null; // 0-5
@@ -143,7 +143,7 @@ export function calculateComponentScore(
  * Calculate overall assessment score from component scores
  */
 export function calculateOverallScore(
-  componentScores: ComponentScore[],
+  componentScores: CalculatedComponentScore[],
   componentWeights?: Record<string, number>
 ): OverallScore {
   if (!componentScores || componentScores.length === 0) {
@@ -478,7 +478,7 @@ export function calculateDebtToEquity(totalLiabilities: number | null, equity: n
 // Critical Gates Detection
 // ============================================================================
 
-export interface CriticalGate {
+export interface DetectedCriticalGate {
   gateKey: string;
   title: string;
   category: 'financial' | 'operational' | 'legal' | 'founder' | 'market' | 'team' | 'strategic' | 'other';
@@ -493,8 +493,8 @@ export interface CriticalGate {
 /**
  * Check for critical gates based on assessment data
  */
-export function checkCriticalGates(data: FinancialData & Record<string, unknown>): CriticalGate[] {
-  const gates: CriticalGate[] = [];
+export function checkCriticalGates(data: FinancialData & Record<string, unknown>): DetectedCriticalGate[] {
+  const gates: DetectedCriticalGate[] = [];
 
   // Calculate derived metrics
   const grossProfit = calculateGrossProfit(data.revenue ?? null, data.costOfGoodsSold ?? null);
@@ -519,7 +519,7 @@ export function checkCriticalGates(data: FinancialData & Record<string, unknown>
   }
 
   // Negative cash balance
-  if (data.cashBalance !== null && data.cashBalance < 0) {
+  if (data.cashBalance !== null && data.cashBalance !== undefined && data.cashBalance < 0) {
     gates.push({
       gateKey: 'negative_cash',
       title: 'Negative Cash Balance',
@@ -551,7 +551,7 @@ export function checkCriticalGates(data: FinancialData & Record<string, unknown>
   // === OPERATIONAL GATES ===
 
   // High accounts payable vs cash
-  if (data.accountsPayable !== null && data.cashBalance !== null && data.accountsPayable > data.cashBalance * 2) {
+  if (data.accountsPayable !== null && data.accountsPayable !== undefined && data.cashBalance !== null && data.cashBalance !== undefined && data.accountsPayable > data.cashBalance * 2) {
     gates.push({
       gateKey: 'payables_crisis',
       title: 'Accounts Payable Crisis',
@@ -568,7 +568,7 @@ export function checkCriticalGates(data: FinancialData & Record<string, unknown>
   // === FOUNDER GATES ===
 
   // Excessive owner hours
-  if (data.ownerHoursPerWeek !== null && data.ownerHoursPerWeek > 70) {
+  if (data.ownerHoursPerWeek !== null && data.ownerHoursPerWeek !== undefined && data.ownerHoursPerWeek > 70) {
     gates.push({
       gateKey: 'founder_overwork',
       title: 'Founder Capacity Overload',
@@ -585,7 +585,7 @@ export function checkCriticalGates(data: FinancialData & Record<string, unknown>
   // === TEAM GATES ===
 
   // Very small team with high revenue (capacity risk)
-  if (data.employeeCount !== null && data.revenue !== null) {
+  if (data.employeeCount !== null && data.employeeCount !== undefined && data.revenue !== null && data.revenue !== undefined) {
     const revenuePerEmployee = data.revenue / data.employeeCount;
     if (revenuePerEmployee > 1000000) {
       gates.push({
@@ -624,7 +624,7 @@ export function checkEmergencyMode(data: FinancialData & Record<string, unknown>
   const netMargin = calculateNetMargin(data.revenue ?? null, data.netIncome ?? null);
 
   // 24-hour emergency: Negative cash or payroll crisis
-  if (data.cashBalance !== null && data.cashBalance < 0) {
+  if (data.cashBalance !== null && data.cashBalance !== undefined && data.cashBalance < 0) {
     return {
       triggered: true,
       reason: 'Negative cash balance - immediate insolvency risk',
