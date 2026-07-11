@@ -28,17 +28,22 @@ export async function GET(request: NextRequest) {
     
     // Filter by category
     if (category) {
-      query = query.eq('category', category);
+      (query as any) = query.eq('category', category);
     }
     
     // Filter by key
-    if (key) {
-      query = query.eq('key', key).single();
-    } else {
-      query = query.order('category', { ascending: true }).order('name', { ascending: true });
-    }
+    let data: any;
+    let error: any;
     
-    const { data, error } = await query;
+    if (key) {
+      const result = await query.eq('key', key).single();
+      data = result.data;
+      error = result.error;
+    } else {
+      const result = await query.order('category', { ascending: true }).order('name', { ascending: true });
+      data = result.data;
+      error = result.error;
+    }
     
     if (error) {
       throw error;
