@@ -41,6 +41,20 @@ export default async function MethodologyPage() {
   
   const { methodology, components, totalIndicators } = summary;
   
+  if (!methodology) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="text-center py-12">
+          <BookOpen className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h2 className="mt-4 text-lg font-semibold">Methodology Not Found</h2>
+          <p className="text-muted-foreground">
+            Unable to load methodology data.
+          </p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="container mx-auto py-8">
       {/* Header */}
