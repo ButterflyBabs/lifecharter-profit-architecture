@@ -123,7 +123,7 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <div className="grid md:grid-cols-2 gap-6">
           <Link
-            href="/assessment"
+            href="/assessments/new"
             className="group bg-[#FDFBF7] rounded-2xl shadow-sacred border border-[#D4AF63]/20 p-6 hover:shadow-sacred-lg hover:border-[#D4AF63]/40 transition-all duration-300"
           >
             <div className="flex items-center justify-between mb-4">
