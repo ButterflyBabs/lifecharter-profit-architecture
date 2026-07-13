@@ -29,12 +29,14 @@ export interface BusinessGoal {
   text: string;
   priority?: 'critical' | 'high' | 'medium' | 'low';
   timeframe?: 'immediate' | 'short_term' | 'medium_term' | 'long_term';
+  type?: 'predefined' | 'other';
 }
 
 export interface BusinessConcern {
   id: string;
   text: string;
   severity?: 'critical' | 'high' | 'medium' | 'low';
+  type?: 'predefined' | 'other';
 }
 
 export interface BusinessAssignment {
@@ -522,4 +524,108 @@ export const usStates = [
   { value: 'WI', label: 'Wisconsin' },
   { value: 'WY', label: 'Wyoming' },
   { value: 'DC', label: 'District of Columbia' },
+];
+
+// Predefined Goal Options - Profit Architecture Methodology
+export interface GoalOption {
+  value: string;
+  label: string;
+  category: string;
+}
+
+export const goalOptions: GoalOption[] = [
+  // Revenue & Growth
+  { value: 'increase_revenue', label: 'Increase revenue/profitability', category: 'Revenue & Growth' },
+  { value: 'new_revenue_streams', label: 'Create new revenue streams', category: 'Revenue & Growth' },
+  { value: 'raise_prices', label: 'Raise prices confidently', category: 'Revenue & Growth' },
+  { value: 'improve_cash_flow', label: 'Improve cash flow', category: 'Revenue & Growth' },
+  { value: 'consistent_income', label: 'Achieve consistent monthly income', category: 'Revenue & Growth' },
+  { value: 'scale_business', label: 'Scale/grow the business', category: 'Revenue & Growth' },
+  { value: 'prepare_expansion', label: 'Prepare for expansion', category: 'Revenue & Growth' },
+  // Marketing & Sales
+  { value: 'attract_ideal_clients', label: 'Attract more ideal clients', category: 'Marketing & Sales' },
+  { value: 'improve_marketing', label: 'Improve marketing effectiveness', category: 'Marketing & Sales' },
+  { value: 'predictable_sales', label: 'Build predictable sales system', category: 'Marketing & Sales' },
+  { value: 'increase_conversion', label: 'Increase conversion rates', category: 'Marketing & Sales' },
+  { value: 'reduce_acquisition_cost', label: 'Reduce cost of customer acquisition', category: 'Marketing & Sales' },
+  { value: 'build_community', label: 'Build email list/community', category: 'Marketing & Sales' },
+  { value: 'online_presence', label: 'Improve online presence', category: 'Marketing & Sales' },
+  // Operations & Systems
+  { value: 'streamline_operations', label: 'Streamline operations', category: 'Operations & Systems' },
+  { value: 'reduce_time_in_business', label: 'Reduce time spent working IN the business', category: 'Operations & Systems' },
+  { value: 'build_systems', label: 'Build systems and processes', category: 'Operations & Systems' },
+  { value: 'improve_team', label: 'Improve team performance', category: 'Operations & Systems' },
+  { value: 'delegate_effectively', label: 'Delegate more effectively', category: 'Operations & Systems' },
+  { value: 'reduce_overwhelm', label: 'Reduce overwhelm/chaos', category: 'Operations & Systems' },
+  { value: 'create_sops', label: 'Create standard operating procedures', category: 'Operations & Systems' },
+  // Personal & Lifestyle
+  { value: 'work_life_balance', label: 'Achieve better work-life balance', category: 'Personal & Lifestyle' },
+  { value: 'reduce_stress', label: 'Reduce stress and burnout', category: 'Personal & Lifestyle' },
+  { value: 'increase_personal_income', label: 'Increase personal income/take-home pay', category: 'Personal & Lifestyle' },
+  { value: 'time_freedom', label: 'Create more time freedom', category: 'Personal & Lifestyle' },
+  { value: 'business_runs_without_me', label: 'Build business that runs without me', category: 'Personal & Lifestyle' },
+  { value: 'prepare_exit', label: 'Prepare for exit/sale', category: 'Personal & Lifestyle' },
+  { value: 'transition_full_time', label: 'Transition from corporate to full-time business', category: 'Personal & Lifestyle' },
+  // Impact & Mission
+  { value: 'increase_impact', label: 'Increase impact/reach more people', category: 'Impact & Mission' },
+  { value: 'align_with_purpose', label: 'Align business with purpose/mission', category: 'Impact & Mission' },
+  { value: 'thought_leadership', label: 'Build thought leadership', category: 'Impact & Mission' },
+  { value: 'create_legacy', label: 'Create legacy', category: 'Impact & Mission' },
+  { value: 'serve_higher_clients', label: 'Serve higher-level clients', category: 'Impact & Mission' },
+  { value: 'expand_geographically', label: 'Expand geographically', category: 'Impact & Mission' },
+  // Other
+  { value: 'other', label: 'Other (specify below)', category: 'Other' },
+];
+
+// Predefined Concern Options - Common Business Pain Points
+export interface ConcernOption {
+  value: string;
+  label: string;
+  category: string;
+}
+
+export const concernOptions: ConcernOption[] = [
+  // Financial
+  { value: 'not_enough_money', label: 'Not making enough money', category: 'Financial' },
+  { value: 'cash_flow_problems', label: 'Inconsistent/cash flow problems', category: 'Financial' },
+  { value: 'pricing_too_low', label: 'Pricing too low', category: 'Financial' },
+  { value: 'not_profitable', label: 'Not profitable enough', category: 'Financial' },
+  { value: 'high_expenses', label: 'High expenses/overhead', category: 'Financial' },
+  { value: 'difficulty_forecasting', label: 'Difficulty forecasting revenue', category: 'Financial' },
+  // Marketing & Sales
+  { value: 'not_enough_leads', label: 'Not enough leads/clients', category: 'Marketing & Sales' },
+  { value: 'marketing_not_working', label: 'Marketing not working', category: 'Marketing & Sales' },
+  { value: 'sales_uncomfortable', label: 'Sales feel uncomfortable/pushy', category: 'Marketing & Sales' },
+  { value: 'difficulty_standing_out', label: 'Difficulty standing out from competition', category: 'Marketing & Sales' },
+  { value: 'low_conversion', label: 'Low conversion rates', category: 'Marketing & Sales' },
+  { value: 'relying_on_referrals', label: 'Relying on referrals only', category: 'Marketing & Sales' },
+  // Time & Capacity
+  { value: 'working_too_much', label: 'Working too many hours', category: 'Time & Capacity' },
+  { value: 'overwhelmed', label: 'Overwhelmed with too much to do', category: 'Time & Capacity' },
+  { value: 'cant_take_time_off', label: "Can't take time off", category: 'Time & Capacity' },
+  { value: 'difficulty_delegating', label: 'Difficulty delegating', category: 'Time & Capacity' },
+  { value: 'wearing_too_many_hats', label: 'Wearing too many hats', category: 'Time & Capacity' },
+  { value: 'no_time_for_strategy', label: 'No time for strategy/planning', category: 'Time & Capacity' },
+  // Team & Operations
+  { value: 'cant_find_help', label: "Can't find good help", category: 'Team & Operations' },
+  { value: 'team_performance', label: 'Team performance issues', category: 'Team & Operations' },
+  { value: 'high_turnover', label: 'High turnover', category: 'Team & Operations' },
+  { value: 'no_systems', label: 'No systems in place', category: 'Team & Operations' },
+  { value: 'quality_control', label: 'Quality control problems', category: 'Team & Operations' },
+  { value: 'delivery_inconsistency', label: 'Delivery inconsistency', category: 'Team & Operations' },
+  // Mindset & Confidence
+  { value: 'imposter_syndrome', label: 'Imposter syndrome', category: 'Mindset & Confidence' },
+  { value: 'fear_of_failure', label: 'Fear of failure', category: 'Mindset & Confidence' },
+  { value: 'fear_of_success', label: 'Fear of success/growth', category: 'Mindset & Confidence' },
+  { value: 'decision_paralysis', label: 'Difficulty making decisions', category: 'Mindset & Confidence' },
+  { value: 'comparison', label: 'Comparison to others', category: 'Mindset & Confidence' },
+  { value: 'perfectionism', label: 'Perfectionism slowing progress', category: 'Mindset & Confidence' },
+  // Market & Competition
+  { value: 'too_much_competition', label: 'Too much competition', category: 'Market & Competition' },
+  { value: 'market_saturation', label: 'Market saturation', category: 'Market & Competition' },
+  { value: 'changing_industry', label: 'Changing industry/trends', category: 'Market & Competition' },
+  { value: 'difficulty_differentiating', label: 'Difficulty differentiating', category: 'Market & Competition' },
+  { value: 'price_competition', label: 'Price competition/race to bottom', category: 'Market & Competition' },
+  // Other
+  { value: 'other', label: 'Other (specify below)', category: 'Other' },
 ];

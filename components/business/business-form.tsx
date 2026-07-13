@@ -1,5 +1,5 @@
 // components/business/business-form.tsx
-// Create/edit business form component
+// Create/edit business form component with dropdown Goals and Concerns
 
 'use client';
 
@@ -7,7 +7,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -15,8 +14,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, X } from 'lucide-react';
-import { industryCategories, usStates } from '@/lib/business/types';
+import { X } from 'lucide-react';
+import { industryCategories, usStates, goalOptions, concernOptions } from '@/lib/business/types';
+
+// Type for goals and concerns with dropdown + other pattern
+interface GoalEntry {
+  id: string;
+  value: string;
+  otherText: string;
+  priority: 'critical' | 'high' | 'medium' | 'low';
+}
+
+interface ConcernEntry {
+  id: string;
+  value: string;
+  otherText: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+}
 
 interface BusinessFormProps {
   initialData?: {
@@ -29,8 +43,8 @@ interface BusinessFormProps {
     location_city?: string;
     location_state?: string;
     years_operating?: number;
-    goals?: { id: string; text: string; priority?: string }[];
-    concerns?: { id: string; text: string; severity?: string }[];
+    goals?: { id: string; text: string; priority?: string; type?: string }[];
+    concerns?: { id: string; text: string; severity?: string; type?: string }[];
   };
   onSubmit: (data: {
     name: string;
@@ -42,10 +56,65 @@ interface BusinessFormProps {
     location_city?: string;
     location_state?: string;
     years_operating?: number;
-    goals: { id: string; text: string; priority?: string }[];
-    concerns: { id: string; text: string; severity?: string }[];
+    goals: { id: string; text: string; priority?: string; type?: string }[];
+    concerns: { id: string; text: string; severity?: string; type?: string }[];
   }) => void;
   isSubmitting?: boolean;
+}
+
+// Convert stored goals to form entries
+function goalsToEntries(goals: { id: string; text: string; priority?: string; type?: string }[]): GoalEntry[] {
+  return goals.map(g => {
+    const isPredefined = goalOptions.some(opt => opt.value !== 'other' && opt.label === g.text);
+    const matchingOption = goalOptions.find(opt => opt.label === g.text);
+    return {
+      id: g.id,
+      value: matchingOption?.value || (g.type === 'other' ? 'other' : ''),
+      otherText: g.type === 'other' ? g.text : '',
+      priority: (g.priority as 'critical' | 'high' | 'medium' | 'low') || 'medium',
+    };
+  });
+}
+
+// Convert stored concerns to form entries
+function concernsToEntries(concerns: { id: string; text: string; severity?: string; type?: string }[]): ConcernEntry[] {
+  return concerns.map(c => {
+    const matchingOption = concernOptions.find(opt => opt.label === c.text);
+    return {
+      id: c.id,
+      value: matchingOption?.value || (c.type === 'other' ? 'other' : ''),
+      otherText: c.type === 'other' ? c.text : '',
+      severity: (c.severity as 'critical' | 'high' | 'medium' | 'low') || 'medium',
+    };
+  });
+}
+
+// Convert form entries to stored goals
+function entriesToGoals(entries: GoalEntry[]): { id: string; text: string; priority: string; type: string }[] {
+  return entries.map(entry => {
+    const option = goalOptions.find(opt => opt.value === entry.value);
+    const isOther = entry.value === 'other';
+    return {
+      id: entry.id,
+      text: isOther ? entry.otherText : (option?.label || entry.value),
+      priority: entry.priority,
+      type: isOther ? 'other' : 'predefined',
+    };
+  });
+}
+
+// Convert form entries to stored concerns
+function entriesToConcerns(entries: ConcernEntry[]): { id: string; text: string; severity: string; type: string }[] {
+  return entries.map(entry => {
+    const option = concernOptions.find(opt => opt.value === entry.value);
+    const isOther = entry.value === 'other';
+    return {
+      id: entry.id,
+      text: isOther ? entry.otherText : (option?.label || entry.value),
+      severity: entry.severity,
+      type: isOther ? 'other' : 'predefined',
+    };
+  });
 }
 
 export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFormProps) {
@@ -59,9 +128,17 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
     location_city: initialData?.location_city || '',
     location_state: initialData?.location_state || '',
     years_operating: initialData?.years_operating?.toString() || '',
-    goals: initialData?.goals || [],
-    concerns: initialData?.concerns || [],
   });
+
+  // Goals state - up to 3
+  const [goals, setGoals] = useState<GoalEntry[]>(() => 
+    goalsToEntries(initialData?.goals || []).slice(0, 3)
+  );
+
+  // Concerns state - up to 3
+  const [concerns, setConcerns] = useState<ConcernEntry[]>(() => 
+    concernsToEntries(initialData?.concerns || []).slice(0, 3)
+  );
 
   // Get available subcategories based on selected category
   const selectedCategory = industryCategories.find(
@@ -69,58 +146,60 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
   );
   const availableSubcategories = selectedCategory?.subcategories || [];
 
-  const [newGoal, setNewGoal] = useState('');
-  const [newGoalPriority, setNewGoalPriority] = useState('medium');
-  const [newConcern, setNewConcern] = useState('');
-  const [newConcernSeverity, setNewConcernSeverity] = useState('medium');
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Filter out empty goals/concerns
+    const validGoals = goals.filter(g => g.value && (g.value !== 'other' || g.otherText.trim()));
+    const validConcerns = concerns.filter(c => c.value && (c.value !== 'other' || c.otherText.trim()));
+    
     onSubmit({
       ...formData,
       years_operating: formData.years_operating ? parseFloat(formData.years_operating) : undefined,
+      goals: entriesToGoals(validGoals),
+      concerns: entriesToConcerns(validConcerns),
     });
   };
 
-  const addGoal = () => {
-    if (!newGoal.trim()) return;
-    setFormData({
-      ...formData,
-      goals: [
-        ...formData.goals,
-        { id: crypto.randomUUID(), text: newGoal.trim(), priority: newGoalPriority },
-      ],
-    });
-    setNewGoal('');
-    setNewGoalPriority('medium');
+  // Add a new goal slot
+  const addGoalSlot = () => {
+    if (goals.length < 3) {
+      setGoals([...goals, { id: crypto.randomUUID(), value: '', otherText: '', priority: 'medium' }]);
+    }
   };
 
+  // Remove a goal
   const removeGoal = (id: string) => {
-    setFormData({
-      ...formData,
-      goals: formData.goals.filter((g) => g.id !== id),
-    });
+    setGoals(goals.filter(g => g.id !== id));
   };
 
-  const addConcern = () => {
-    if (!newConcern.trim()) return;
-    setFormData({
-      ...formData,
-      concerns: [
-        ...formData.concerns,
-        { id: crypto.randomUUID(), text: newConcern.trim(), severity: newConcernSeverity },
-      ],
-    });
-    setNewConcern('');
-    setNewConcernSeverity('medium');
+  // Update a goal
+  const updateGoal = (id: string, updates: Partial<GoalEntry>) => {
+    setGoals(goals.map(g => g.id === id ? { ...g, ...updates } : g));
   };
 
+  // Add a new concern slot
+  const addConcernSlot = () => {
+    if (concerns.length < 3) {
+      setConcerns([...concerns, { id: crypto.randomUUID(), value: '', otherText: '', severity: 'medium' }]);
+    }
+  };
+
+  // Remove a concern
   const removeConcern = (id: string) => {
-    setFormData({
-      ...formData,
-      concerns: formData.concerns.filter((c) => c.id !== id),
-    });
+    setConcerns(concerns.filter(c => c.id !== id));
   };
+
+  // Update a concern
+  const updateConcern = (id: string, updates: Partial<ConcernEntry>) => {
+    setConcerns(concerns.map(c => c.id === id ? { ...c, ...updates } : c));
+  };
+
+  // Group goal options by category for the dropdown
+  const goalCategories = Array.from(new Set(goalOptions.map(g => g.category)));
+  
+  // Group concern options by category for the dropdown
+  const concernCategories = Array.from(new Set(concernOptions.map(c => c.category)));
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -290,97 +369,182 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
         </div>
       </div>
 
-      {/* Goals */}
+      {/* Top 3 Goals */}
       <div className="space-y-4 pt-4 border-t">
-        <h3 className="text-lg font-medium">Goals</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium">Top 3 Goals *</h3>
+          <span className="text-xs text-muted-foreground">At least 1 required</span>
+        </div>
         
-        <div className="space-y-2">
-          {formData.goals.map((goal) => (
-            <div key={goal.id} className="flex items-center gap-2 p-2 bg-muted rounded">
-              <span className="flex-1">{goal.text}</span>
-              <span className="text-xs text-muted-foreground capitalize">{goal.priority}</span>
-              <button
-                type="button"
-                onClick={() => removeGoal(goal.id)}
-                className="text-muted-foreground hover:text-destructive"
-              >
-                <X className="h-4 w-4" />
-              </button>
+        <div className="space-y-3">
+          {goals.map((goal, index) => (
+            <div key={goal.id} className="flex items-start gap-2 p-3 bg-muted rounded-lg">
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-muted-foreground w-14">Goal {index + 1}:</span>
+                  <Select
+                    value={goal.value}
+                    onValueChange={(value) => updateGoal(goal.id, { value, otherText: value === 'other' ? goal.otherText : '' })}
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Select a goal..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {goalCategories.map(category => (
+                        <div key={category}>
+                          <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted">
+                            {category}
+                          </div>
+                          {goalOptions
+                            .filter(opt => opt.category === category)
+                            .map(opt => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                        </div>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {goal.value === 'other' && (
+                  <div className="flex items-center gap-2 pl-16">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">Other:</span>
+                    <Input
+                      value={goal.otherText}
+                      onChange={(e) => updateGoal(goal.id, { otherText: e.target.value })}
+                      placeholder="Specify your goal..."
+                      className="flex-1"
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Select value={goal.priority} onValueChange={(v) => updateGoal(goal.id, { priority: v as GoalEntry['priority'] })}>
+                  <SelectTrigger className="w-28">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeGoal(goal.id)}
+                  className="h-9 w-9"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="flex gap-2">
-          <Input
-            value={newGoal}
-            onChange={(e) => setNewGoal(e.target.value)}
-            placeholder="Add a goal..."
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addGoal())}
-          />
-          <Select value={newGoalPriority} onValueChange={setNewGoalPriority}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="critical">Critical</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button type="button" variant="outline" size="icon" onClick={addGoal}>
-            <Plus className="h-4 w-4" />
+        {goals.length < 3 && (
+          <Button type="button" variant="outline" onClick={addGoalSlot} className="w-full">
+            + Add Goal {goals.length + 1}
           </Button>
-        </div>
+        )}
       </div>
 
-      {/* Concerns */}
+      {/* Top 3 Concerns */}
       <div className="space-y-4 pt-4 border-t">
-        <h3 className="text-lg font-medium">Concerns</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium">Top 3 Concerns *</h3>
+          <span className="text-xs text-muted-foreground">At least 1 required</span>
+        </div>
         
-        <div className="space-y-2">
-          {formData.concerns.map((concern) => (
-            <div key={concern.id} className="flex items-center gap-2 p-2 bg-muted rounded">
-              <span className="flex-1">{concern.text}</span>
-              <span className="text-xs text-muted-foreground capitalize">{concern.severity}</span>
-              <button
-                type="button"
-                onClick={() => removeConcern(concern.id)}
-                className="text-muted-foreground hover:text-destructive"
-              >
-                <X className="h-4 w-4" />
-              </button>
+        <div className="space-y-3">
+          {concerns.map((concern, index) => (
+            <div key={concern.id} className="flex items-start gap-2 p-3 bg-muted rounded-lg">
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-muted-foreground w-16">Concern {index + 1}:</span>
+                  <Select
+                    value={concern.value}
+                    onValueChange={(value) => updateConcern(concern.id, { value, otherText: value === 'other' ? concern.otherText : '' })}
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Select a concern..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {concernCategories.map(category => (
+                        <div key={category}>
+                          <div className="px-2 py-1 text-xs font-semibold text-muted-foreground bg-muted">
+                            {category}
+                          </div>
+                          {concernOptions
+                            .filter(opt => opt.category === category)
+                            .map(opt => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                        </div>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {concern.value === 'other' && (
+                  <div className="flex items-center gap-2 pl-20">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">Other:</span>
+                    <Input
+                      value={concern.otherText}
+                      onChange={(e) => updateConcern(concern.id, { otherText: e.target.value })}
+                      placeholder="Specify your concern..."
+                      className="flex-1"
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Select value={concern.severity} onValueChange={(v) => updateConcern(concern.id, { severity: v as ConcernEntry['severity'] })}>
+                  <SelectTrigger className="w-28">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeConcern(concern.id)}
+                  className="h-9 w-9"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="flex gap-2">
-          <Input
-            value={newConcern}
-            onChange={(e) => setNewConcern(e.target.value)}
-            placeholder="Add a concern..."
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addConcern())}
-          />
-          <Select value={newConcernSeverity} onValueChange={setNewConcernSeverity}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="critical">Critical</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button type="button" variant="outline" size="icon" onClick={addConcern}>
-            <Plus className="h-4 w-4" />
+        {concerns.length < 3 && (
+          <Button type="button" variant="outline" onClick={addConcernSlot} className="w-full">
+            + Add Concern {concerns.length + 1}
           </Button>
-        </div>
+        )}
       </div>
 
       {/* Submit */}
       <div className="pt-4 border-t flex justify-end gap-3">
-        <Button type="submit" disabled={isSubmitting || !formData.name || !formData.organization_type}>
+        <Button 
+          type="submit" 
+          disabled={isSubmitting || !formData.name || !formData.organization_type || goals.length === 0 || concerns.length === 0}
+        >
           {isSubmitting ? 'Saving...' : initialData ? 'Update Business' : 'Create Business'}
         </Button>
       </div>

@@ -25,11 +25,13 @@ const updateBusinessSchema = z.object({
     text: z.string(),
     priority: z.enum(['critical', 'high', 'medium', 'low']).optional(),
     timeframe: z.enum(['immediate', 'short_term', 'medium_term', 'long_term']).optional(),
+    type: z.enum(['predefined', 'other']).optional(),
   })).optional(),
   concerns: z.array(z.object({
     id: z.string(),
     text: z.string(),
     severity: z.enum(['critical', 'high', 'medium', 'low']).optional(),
+    type: z.enum(['predefined', 'other']).optional(),
   })).optional(),
 });
 

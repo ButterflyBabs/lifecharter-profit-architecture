@@ -24,8 +24,8 @@ export default function NewBusinessPage() {
     location_city?: string;
     location_state?: string;
     years_operating?: number;
-    goals: { id: string; text: string; priority?: string }[];
-    concerns: { id: string; text: string; severity?: string }[];
+    goals: { id: string; text: string; priority?: string; type?: string }[];
+    concerns: { id: string; text: string; severity?: string; type?: string }[];
   }) => {
     setIsSubmitting(true);
 
