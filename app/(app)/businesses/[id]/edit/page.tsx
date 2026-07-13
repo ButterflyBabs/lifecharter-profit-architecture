@@ -46,11 +46,18 @@ export default function EditBusinessPage({ params }: PageProps) {
     name: string;
     alias?: string;
     organization_type: string;
+    organization_type_category?: 'for_profit' | 'non_profit' | 'other';
+    organization_type_other?: string;
     industry_category?: string;
     industry_subcategory?: string;
     industry_other?: string;
     location_city?: string;
     location_state?: string;
+    street_address_line_1?: string;
+    street_address_line_2?: string;
+    address_city?: string;
+    address_state?: string;
+    address_zip_code?: string;
     years_operating?: number;
     goals: { id: string; text: string; priority?: string; type?: string }[];
     concerns: { id: string; text: string; severity?: string; type?: string }[];
@@ -127,6 +134,8 @@ export default function EditBusinessPage({ params }: PageProps) {
             name: business.name,
             alias: business.alias,
             organization_type: business.organization_type,
+            organization_type_category: business.organization_type_category,
+            organization_type_other: business.organization_type_other,
             industry_category: business.industry?.includes(':')
               ? business.industry.split(':')[0]
               : business.industry,
@@ -136,6 +145,11 @@ export default function EditBusinessPage({ params }: PageProps) {
             industry_other: business.industry_other,
             location_city: business.location_city,
             location_state: business.location_state,
+            street_address_line_1: business.street_address_line_1,
+            street_address_line_2: business.street_address_line_2,
+            address_city: business.address_city,
+            address_state: business.address_state,
+            address_zip_code: business.address_zip_code,
             years_operating: business.years_operating,
             goals: business.goals || [],
             concerns: business.concerns || [],

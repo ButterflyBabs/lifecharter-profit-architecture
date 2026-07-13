@@ -18,11 +18,18 @@ export default function NewBusinessPage() {
     name: string;
     alias?: string;
     organization_type: string;
+    organization_type_category?: 'for_profit' | 'non_profit' | 'other';
+    organization_type_other?: string;
     industry_category?: string;
     industry_subcategory?: string;
     industry_other?: string;
     location_city?: string;
     location_state?: string;
+    street_address_line_1?: string;
+    street_address_line_2?: string;
+    address_city?: string;
+    address_state?: string;
+    address_zip_code?: string;
     years_operating?: number;
     goals: { id: string; text: string; priority?: string; type?: string }[];
     concerns: { id: string; text: string; severity?: string; type?: string }[];

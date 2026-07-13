@@ -1,18 +1,91 @@
 // lib/business/types.ts
 // TypeScript types for business entities
 
+// Organization Type Types
+export type OrganizationTypeCategory = 'for_profit' | 'non_profit' | 'other';
+
+export interface OrganizationTypeEntity {
+  value: string;
+  label: string;
+  category: OrganizationTypeCategory;
+}
+
+export interface OrganizationTypeCategoryGroup {
+  value: OrganizationTypeCategory;
+  label: string;
+  entities: OrganizationTypeEntity[];
+}
+
+// Organization type options with categories and entities
+export const organizationTypeCategories: OrganizationTypeCategoryGroup[] = [
+  {
+    value: 'for_profit',
+    label: 'For Profit',
+    entities: [
+      { value: 'sole_proprietor', label: 'Sole Proprietor', category: 'for_profit' },
+      { value: 'llc', label: 'LLC (Limited Liability Company)', category: 'for_profit' },
+      { value: 'c_corp', label: 'C-Corp', category: 'for_profit' },
+      { value: 's_corp', label: 'S-Corp', category: 'for_profit' },
+      { value: 'partnership', label: 'Partnership', category: 'for_profit' },
+      { value: 'b_corp', label: 'B-Corp (Benefit Corporation)', category: 'for_profit' },
+      { value: 'other_for_profit', label: 'Other (specify)', category: 'for_profit' },
+    ],
+  },
+  {
+    value: 'non_profit',
+    label: 'Non-Profit',
+    entities: [
+      { value: '501c3', label: '501(c)(3)', category: 'non_profit' },
+      { value: '501c4', label: '501(c)(4)', category: 'non_profit' },
+      { value: '501c6', label: '501(c)(6)', category: 'non_profit' },
+      { value: 'other_non_profit', label: 'Other (specify)', category: 'non_profit' },
+    ],
+  },
+  {
+    value: 'other',
+    label: 'Other',
+    entities: [
+      { value: 'cooperative', label: 'Cooperative', category: 'other' },
+      { value: 'professional_association', label: 'Professional Association', category: 'other' },
+      { value: 'joint_venture', label: 'Joint Venture', category: 'other' },
+      { value: 'holding_company', label: 'Holding Company', category: 'other' },
+      { value: 'other_organization', label: 'Other (specify)', category: 'other' },
+    ],
+  },
+];
+
+// Flat list for backwards compatibility
+export const organizationTypes = organizationTypeCategories.flatMap(cat =>
+  cat.entities.map(entity => ({
+    value: entity.value,
+    label: `${cat.label} - ${entity.label}`,
+    category: cat.value,
+  }))
+);
+
 // Database entity types
 export interface Business {
   id: string;
   tenant_id: string;
   name: string;
   alias?: string;
-  organization_type: 'for_profit' | 'nonprofit' | 'social_enterprise' | 'cooperative';
+  organization_type: string;
+  organization_type_category?: OrganizationTypeCategory;
+  organization_type_other?: string;
   industry?: string;
   industry_other?: string;
+  // Legacy location fields (kept for backward compatibility)
   location_city?: string;
   location_state?: string;
   location_country: string;
+  // Full mailing address fields
+  street_address_line_1?: string;
+  street_address_line_2?: string;
+  address_city?: string;
+  address_state?: string;
+  address_zip_code?: string;
+  address_country?: string;
+  full_address?: string;
   years_operating?: number;
   founded_year?: number;
   status: 'active' | 'inactive' | 'archived';
@@ -161,12 +234,22 @@ export interface BusinessGoalRecord {
 export interface CreateBusinessInput {
   name: string;
   alias?: string;
-  organization_type: 'for_profit' | 'nonprofit' | 'social_enterprise' | 'cooperative';
+  organization_type: string;
+  organization_type_category?: OrganizationTypeCategory;
+  organization_type_other?: string;
   industry?: string;
   industry_other?: string;
+  // Legacy location fields
   location_city?: string;
   location_state?: string;
   location_country?: string;
+  // Full mailing address fields
+  street_address_line_1?: string;
+  street_address_line_2?: string;
+  address_city?: string;
+  address_state?: string;
+  address_zip_code?: string;
+  address_country?: string;
   years_operating?: number;
   founded_year?: number;
   goals?: BusinessGoal[];

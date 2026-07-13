@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { X } from 'lucide-react';
-import { industryCategories, usStates, goalOptions, concernOptions } from '@/lib/business/types';
+import { industryCategories, usStates, goalOptions, concernOptions, organizationTypeCategories, OrganizationTypeCategory } from '@/lib/business/types';
 
 // Type for goals and concerns with dropdown + other pattern
 interface GoalEntry {
@@ -37,11 +37,20 @@ interface BusinessFormProps {
     name?: string;
     alias?: string;
     organization_type?: string;
+    organization_type_category?: OrganizationTypeCategory;
+    organization_type_other?: string;
     industry_category?: string;
     industry_subcategory?: string;
     industry_other?: string;
+    // Legacy location fields
     location_city?: string;
     location_state?: string;
+    // Full address fields
+    street_address_line_1?: string;
+    street_address_line_2?: string;
+    address_city?: string;
+    address_state?: string;
+    address_zip_code?: string;
     years_operating?: number;
     goals?: { id: string; text: string; priority?: string; type?: string }[];
     concerns?: { id: string; text: string; severity?: string; type?: string }[];
@@ -50,11 +59,20 @@ interface BusinessFormProps {
     name: string;
     alias?: string;
     organization_type: string;
+    organization_type_category?: OrganizationTypeCategory;
+    organization_type_other?: string;
     industry_category?: string;
     industry_subcategory?: string;
     industry_other?: string;
+    // Legacy location fields
     location_city?: string;
     location_state?: string;
+    // Full address fields
+    street_address_line_1?: string;
+    street_address_line_2?: string;
+    address_city?: string;
+    address_state?: string;
+    address_zip_code?: string;
     years_operating?: number;
     goals: { id: string; text: string; priority?: string; type?: string }[];
     concerns: { id: string; text: string; severity?: string; type?: string }[];
@@ -65,7 +83,6 @@ interface BusinessFormProps {
 // Convert stored goals to form entries
 function goalsToEntries(goals: { id: string; text: string; priority?: string; type?: string }[]): GoalEntry[] {
   return goals.map(g => {
-    const isPredefined = goalOptions.some(opt => opt.value !== 'other' && opt.label === g.text);
     const matchingOption = goalOptions.find(opt => opt.label === g.text);
     return {
       id: g.id,
@@ -122,11 +139,20 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
     name: initialData?.name || '',
     alias: initialData?.alias || '',
     organization_type: initialData?.organization_type || '',
+    organization_type_category: initialData?.organization_type_category || '',
+    organization_type_other: initialData?.organization_type_other || '',
     industry_category: initialData?.industry_category || '',
     industry_subcategory: initialData?.industry_subcategory || '',
     industry_other: initialData?.industry_other || '',
+    // Legacy location fields
     location_city: initialData?.location_city || '',
     location_state: initialData?.location_state || '',
+    // Full address fields
+    street_address_line_1: initialData?.street_address_line_1 || '',
+    street_address_line_2: initialData?.street_address_line_2 || '',
+    address_city: initialData?.address_city || '',
+    address_state: initialData?.address_state || '',
+    address_zip_code: initialData?.address_zip_code || '',
     years_operating: initialData?.years_operating?.toString() || '',
   });
 
@@ -145,6 +171,15 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
     (cat) => cat.value === formData.industry_category
   );
   const availableSubcategories = selectedCategory?.subcategories || [];
+
+  // Get available organization type entities based on selected category
+  const selectedOrgTypeCategory = organizationTypeCategories.find(
+    (cat) => cat.value === formData.organization_type_category
+  );
+  const availableOrgTypeEntities = selectedOrgTypeCategory?.entities || [];
+
+  // Check if "Other" is selected for organization type
+  const isOrgTypeOther = formData.organization_type?.includes('other_') || false;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -230,26 +265,80 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
           </div>
         </div>
 
+        {/* Organization Type - Two-level selection */}
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="organization_type">Organization Type *</Label>
+            <Label htmlFor="organization_type_category">Organization Category *</Label>
             <Select
-              value={formData.organization_type}
-              onValueChange={(value) => setFormData({ ...formData, organization_type: value })}
+              value={formData.organization_type_category}
+              onValueChange={(value) =>
+                setFormData({
+                  ...formData,
+                  organization_type_category: value as OrganizationTypeCategory,
+                  organization_type: '', // Reset entity when category changes
+                  organization_type_other: '', // Reset other text when category changes
+                })
+              }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select organization type" />
+                <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="for_profit">For-Profit</SelectItem>
-                <SelectItem value="nonprofit">Nonprofit</SelectItem>
-                <SelectItem value="social_enterprise">Social Enterprise</SelectItem>
-                <SelectItem value="cooperative">Cooperative</SelectItem>
+                {organizationTypeCategories.map((category) => (
+                  <SelectItem key={category.value} value={category.value}>
+                    {category.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="organization_type">Entity Type *</Label>
+            <Select
+              value={formData.organization_type}
+              onValueChange={(value) =>
+                setFormData({
+                  ...formData,
+                  organization_type: value,
+                  organization_type_other: value.includes('other_') ? formData.organization_type_other : '',
+                })
+              }
+              disabled={!formData.organization_type_category}
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={
+                    formData.organization_type_category
+                      ? 'Select entity type'
+                      : 'Select category first'
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {availableOrgTypeEntities.map((entity) => (
+                  <SelectItem key={entity.value} value={entity.value}>
+                    {entity.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+
+        {isOrgTypeOther && (
+          <div className="space-y-2">
+            <Label htmlFor="organization_type_other">Please specify</Label>
+            <Input
+              id="organization_type_other"
+              value={formData.organization_type_other}
+              onChange={(e) =>
+                setFormData({ ...formData, organization_type_other: e.target.value })
+              }
+              placeholder="Specify organization type"
+            />
+          </div>
+        )}
 
         {/* Industry - Two-level selection */}
         <div className="grid gap-4 md:grid-cols-2">
@@ -320,26 +409,49 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
         )}
       </div>
 
-      {/* Location */}
+      {/* Mailing Address */}
       <div className="space-y-4 pt-4 border-t">
-        <h3 className="text-lg font-medium">Location</h3>
+        <h3 className="text-lg font-medium">Mailing Address</h3>
         
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="street_address_line_1">Street Address *</Label>
+          <Input
+            id="street_address_line_1"
+            value={formData.street_address_line_1}
+            onChange={(e) => setFormData({ ...formData, street_address_line_1: e.target.value })}
+            placeholder="123 Main Street"
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="street_address_line_2">Apt, Suite, Unit, etc. (optional)</Label>
+          <Input
+            id="street_address_line_2"
+            value={formData.street_address_line_2}
+            onChange={(e) => setFormData({ ...formData, street_address_line_2: e.target.value })}
+            placeholder="Suite 100, Apt 4B, etc."
+          />
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <Label htmlFor="location_city">City</Label>
+            <Label htmlFor="address_city">City *</Label>
             <Input
-              id="location_city"
-              value={formData.location_city}
-              onChange={(e) => setFormData({ ...formData, location_city: e.target.value })}
-              placeholder="Enter city"
+              id="address_city"
+              value={formData.address_city}
+              onChange={(e) => setFormData({ ...formData, address_city: e.target.value })}
+              placeholder="Denver"
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location_state">State</Label>
+            <Label htmlFor="address_state">State *</Label>
             <Select
-              value={formData.location_state}
-              onValueChange={(value) => setFormData({ ...formData, location_state: value })}
+              value={formData.address_state}
+              onValueChange={(value) => setFormData({ ...formData, address_state: value })}
+              required
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select state" />
@@ -352,6 +464,23 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address_zip_code">ZIP Code *</Label>
+            <Input
+              id="address_zip_code"
+              value={formData.address_zip_code}
+              onChange={(e) => {
+                // Only allow digits and hyphen
+                const value = e.target.value.replace(/[^\d-]/g, '');
+                setFormData({ ...formData, address_zip_code: value });
+              }}
+              placeholder="80202 or 80202-1234"
+              pattern="^\d{5}(-\d{4})?$"
+              title="Enter a valid ZIP code (5 digits or 5+4 format)"
+              required
+            />
           </div>
         </div>
 
@@ -543,7 +672,7 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
       <div className="pt-4 border-t flex justify-end gap-3">
         <Button 
           type="submit" 
-          disabled={isSubmitting || !formData.name || !formData.organization_type || goals.length === 0 || concerns.length === 0}
+          disabled={isSubmitting || !formData.name || !formData.organization_type_category || !formData.organization_type || goals.length === 0 || concerns.length === 0}
         >
           {isSubmitting ? 'Saving...' : initialData ? 'Update Business' : 'Create Business'}
         </Button>

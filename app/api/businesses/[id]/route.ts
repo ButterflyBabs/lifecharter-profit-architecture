@@ -9,14 +9,24 @@ import { z } from 'zod';
 const updateBusinessSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   alias: z.string().max(255).optional().nullable(),
-  organization_type: z.enum(['for_profit', 'nonprofit', 'social_enterprise', 'cooperative']).optional(),
+  organization_type: z.string().optional(),
+  organization_type_category: z.enum(['for_profit', 'non_profit', 'other']).optional(),
+  organization_type_other: z.string().optional().nullable(),
   industry: z.string().optional().nullable(), // Legacy field
   industry_category: z.string().optional(),
   industry_subcategory: z.string().optional(),
   industry_other: z.string().optional().nullable(),
+  // Legacy location fields
   location_city: z.string().optional().nullable(),
   location_state: z.string().optional().nullable(),
   location_country: z.string().optional().nullable(),
+  // Full mailing address fields
+  street_address_line_1: z.string().min(1).max(255).optional(),
+  street_address_line_2: z.string().max(255).optional().nullable(),
+  address_city: z.string().min(1).max(255).optional(),
+  address_state: z.string().length(2).optional(),
+  address_zip_code: z.string().regex(/^\d{5}(-\d{4})?$/).optional(),
+  address_country: z.string().optional(),
   years_operating: z.number().min(0).optional().nullable(),
   founded_year: z.number().min(1800).max(new Date().getFullYear()).optional().nullable(),
   status: z.enum(['active', 'inactive', 'archived']).optional(),
@@ -147,11 +157,21 @@ export async function PUT(
     if (data.name !== undefined) updateData.name = data.name;
     if (data.alias !== undefined) updateData.alias = data.alias;
     if (data.organization_type !== undefined) updateData.organization_type = data.organization_type;
+    if (data.organization_type_category !== undefined) updateData.organization_type_category = data.organization_type_category;
+    if (data.organization_type_other !== undefined) updateData.organization_type_other = data.organization_type_other;
     if (industryValue !== undefined) updateData.industry = industryValue;
     if (data.industry_other !== undefined) updateData.industry_other = data.industry_other;
+    // Legacy location fields
     if (data.location_city !== undefined) updateData.location_city = data.location_city;
     if (data.location_state !== undefined) updateData.location_state = data.location_state;
     if (data.location_country !== undefined) updateData.location_country = data.location_country;
+    // Full mailing address fields
+    if (data.street_address_line_1 !== undefined) updateData.street_address_line_1 = data.street_address_line_1;
+    if (data.street_address_line_2 !== undefined) updateData.street_address_line_2 = data.street_address_line_2;
+    if (data.address_city !== undefined) updateData.address_city = data.address_city;
+    if (data.address_state !== undefined) updateData.address_state = data.address_state;
+    if (data.address_zip_code !== undefined) updateData.address_zip_code = data.address_zip_code;
+    if (data.address_country !== undefined) updateData.address_country = data.address_country;
     if (data.years_operating !== undefined) updateData.years_operating = data.years_operating;
     if (data.founded_year !== undefined) updateData.founded_year = data.founded_year;
     if (data.status !== undefined) updateData.status = data.status;
