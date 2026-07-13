@@ -17,6 +17,22 @@ interface Business {
   industry?: string;
   status: string;
   created_at: string;
+  tpa_pathway_classification?: {
+    pathway: string;
+    pathway_number: number;
+    confidence: number;
+  } | null;
+  tpa_business_assignments?: {
+    role: string;
+    user?: {
+      display_name?: string;
+      email?: string;
+    };
+  }[];
+  tpa_business_classifications?: {
+    primary_pathway: string;
+    confidence: number;
+  }[];
 }
 
 export default function BusinessesPage() {

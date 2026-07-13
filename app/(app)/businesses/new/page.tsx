@@ -67,8 +67,8 @@ export default function NewBusinessPage() {
         // Store in localStorage for demo mode
         localStorage.setItem('tpa_demo_business', JSON.stringify(demoBusiness));
         
-        // Redirect to the business detail page
-        router.push(`/businesses/${demoBusiness.id}`);
+        // Redirect to classification wizard
+        router.push(`/businesses/${demoBusiness.id}/classification`);
         return;
       }
 
@@ -90,7 +90,8 @@ export default function NewBusinessPage() {
       }
 
       const result = await response.json();
-      router.push(`/businesses/${result.business.id}`);
+      // Redirect to classification wizard after creating business
+      router.push(`/businesses/${result.business.id}/classification`);
     } catch (error) {
       console.error('Error creating business:', error);
       alert(error instanceof Error ? error.message : 'Failed to create business');

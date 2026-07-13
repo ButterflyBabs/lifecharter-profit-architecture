@@ -2,8 +2,9 @@
 // Business summary card component - LifeCharter Brand Styling
 
 import Link from 'next/link';
-import { PathwayBadge } from './pathway-badge';
-import { Building2, MapPin, Users, ArrowRight } from 'lucide-react';
+import { TPAPathwayBadgeCompact } from './tpa-pathway-badge';
+import { Building2, MapPin, Users, ArrowRight, Compass } from 'lucide-react';
+import type { TPAPathway } from '@/lib/classification/tpa-types';
 
 interface BusinessCardProps {
   business: {
@@ -22,6 +23,13 @@ interface BusinessCardProps {
         email?: string;
       };
     }[];
+    // New pathway classification
+    tpa_pathway_classification?: {
+      pathway: string;
+      pathway_number: number;
+      confidence: number;
+    } | null;
+    // Legacy classification (for backwards compatibility)
     tpa_business_classifications?: {
       primary_pathway: string;
       confidence: number;
@@ -30,7 +38,9 @@ interface BusinessCardProps {
 }
 
 export function BusinessCard({ business }: BusinessCardProps) {
-  const classification = business.tpa_business_classifications?.[0];
+  // Use new pathway classification if available, fall back to legacy
+  const pathwayClassification = business.tpa_pathway_classification;
+  const legacyClassification = business.tpa_business_classifications?.[0];
   const primaryFacilitator = business.tpa_business_assignments?.find(
     (a) => a.role === 'primary_facilitator'
   );
@@ -78,16 +88,31 @@ export function BusinessCard({ business }: BusinessCardProps) {
 
         {/* Pathway badge */}
         <div className="mt-auto pt-4 border-t border-[#D4AF63]/10">
-          {classification ? (
+          {pathwayClassification ? (
             <div className="flex items-center justify-between">
-              <PathwayBadge pathway={classification.primary_pathway} size="sm" />
+              <TPAPathwayBadgeCompact 
+                pathway={pathwayClassification.pathway} 
+                pathwayNumber={pathwayClassification.pathway_number}
+              />
               <span className="font-body text-xs text-[#1F315B]/50">
-                {Math.round(classification.confidence * 100)}% confidence
+                {Math.round(pathwayClassification.confidence * 100)}% confidence
+              </span>
+            </div>
+          ) : legacyClassification ? (
+            <div className="flex items-center justify-between">
+              <span className="font-body text-xs text-[#1F315B]/60 capitalize">
+                {legacyClassification.primary_pathway.replace(/_/g, ' ')}
+              </span>
+              <span className="font-body text-xs text-[#1F315B]/50">
+                {Math.round(legacyClassification.confidence * 100)}%
               </span>
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <span className="font-body text-sm text-[#1F315B]/50 italic">Not classified</span>
+              <span className="flex items-center gap-1.5 font-body text-sm text-[#1F315B]/50 italic">
+                <Compass className="h-3.5 w-3.5" />
+                Not classified
+              </span>
               <span className="font-body text-xs text-[#5E3B6C]">Classify →</span>
             </div>
           )}
