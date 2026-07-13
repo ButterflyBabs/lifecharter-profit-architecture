@@ -51,17 +51,23 @@ export default function LoginPage() {
         throw new Error(data.error || 'Login failed')
       }
 
-      // Set demo mode flag if this is a demo login
-      if (isDemo || data.demoMode) {
-        setDemoMode(true)
-      }
-
       // Set the session in the client
       const supabase = createClient()
-      await supabase.auth.setSession({
+      const { error: sessionError } = await supabase.auth.setSession({
         access_token: data.session.access_token,
         refresh_token: data.session.refresh_token,
       })
+
+      // Handle session error but don't block demo mode
+      if (sessionError) {
+        console.warn('Session set warning:', sessionError)
+      }
+
+      // Set demo mode flag if this is a demo login
+      // This must be set AFTER session is stored so dashboard can detect it
+      if (isDemo || data.demoMode) {
+        setDemoMode(true)
+      }
 
       // Login successful - redirect to dashboard
       router.push('/dashboard')

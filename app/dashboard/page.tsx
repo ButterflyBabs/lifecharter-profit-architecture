@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { LogOut, User, Settings, ChevronRight, Sparkles } from 'lucide-react'
 import DemoBanner from '@/components/demo-banner'
-import { getDemoMode, clearDemoMode } from '@/lib/auth'
+import { getDemoMode, clearDemoMode, DEMO_USER } from '@/lib/auth'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -18,6 +18,19 @@ export default function DashboardPage() {
 
     // Check if user is authenticated
     const checkAuth = async () => {
+      const isDemo = getDemoMode()
+
+      // Check for demo mode FIRST - if in demo mode, allow access regardless of session
+      if (isDemo) {
+        // Demo user - use demo user data
+        setUser({
+          email: DEMO_USER.email,
+          name: DEMO_USER.user_metadata?.full_name || 'Demo User',
+        })
+        setLoading(false)
+        return
+      }
+
       const { data: { session } } = await supabase.auth.getSession()
 
       if (!session) {
@@ -33,6 +46,10 @@ export default function DashboardPage() {
           email: authUser.email || '',
           name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
         })
+      } else {
+        // No user found, redirect to login
+        router.push('/login')
+        return
       }
 
       setLoading(false)
