@@ -2,34 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap');
+
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
+  /* LifeCharter Brand Colors */
+  --deep-indigo: #1F315B;
+  --royal-plum: #5E3B6C;
+  --sacred-teal: #2E7C83;
+  --soft-lavender: #CDBFD6;
+  --warm-gold: #D4AF63;
+  --ivory-light: #F6F1E8;
+  --soft-taupe: #B9A9A9;
+  
+  /* Semantic mappings */
+  --foreground-rgb: 31, 49, 91;
+  --background-start-rgb: 246, 241, 232;
   --background-end-rgb: 255, 255, 255;
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    /* Shadcn UI Theme - mapped to LifeCharter Brand */
+    --background: 40 33% 95%; /* Ivory Light */
+    --foreground: 222 32% 24%; /* Deep Indigo */
+    --card: 40 33% 95%; /* Ivory Light */
+    --card-foreground: 222 32% 24%; /* Deep Indigo */
+    --popover: 40 33% 95%; /* Ivory Light */
+    --popover-foreground: 222 32% 24%; /* Deep Indigo */
+    --primary: 222 32% 24%; /* Deep Indigo */
+    --primary-foreground: 40 33% 95%; /* Ivory Light */
+    --secondary: 280 28% 33%; /* Royal Plum */
+    --secondary-foreground: 40 33% 95%; /* Ivory Light */
+    --muted: 40 20% 88%; /* Softened Ivory */
+    --muted-foreground: 222 20% 45%; /* Muted Indigo */
+    --accent: 183 48% 35%; /* Sacred Teal */
+    --accent-foreground: 40 33% 95%; /* Ivory Light */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 40 33% 95%;
+    --border: 40 20% 80%;
+    --input: 40 20% 85%;
+    --ring: 43 52% 61%; /* Warm Gold */
+    --radius: 0.75rem;
+    
+    /* Brand-specific custom properties */
+    --brand-deep-indigo: #1F315B;
+    --brand-royal-plum: #5E3B6C;
+    --brand-sacred-teal: #2E7C83;
+    --brand-soft-lavender: #CDBFD6;
+    --brand-warm-gold: #D4AF63;
+    --brand-ivory-light: #F6F1E8;
+    --brand-soft-taupe: #B9A9A9;
   }
 }
 
@@ -37,7 +59,114 @@
   * {
     @apply border-border;
   }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #F6F1E8 0%, #FDFBF7 50%, #F6F1E8 100%);
+    min-height: 100vh;
+  }
+  
+  /* Typography Classes */
+  .font-display {
+    font-family: 'Playfair Display', serif;
+  }
+  
+  .font-editorial {
+    font-family: 'Cormorant Garamond', serif;
+  }
+  
+  .font-body {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  /* Gold Filigree Accent */
+  .gold-filigree {
+    background: linear-gradient(135deg, #D4AF63 0%, #E8D5A3 50%, #D4AF63 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .gold-border {
+    border: 1px solid #D4AF63;
+  }
+  
+  .gold-border-thin {
+    border: 0.5px solid rgba(212, 175, 99, 0.5);
+  }
+  
+  /* Sacred Panel Styling */
+  .sacred-panel {
+    background: rgba(246, 241, 232, 0.95);
+    border: 0.5px solid rgba(212, 175, 99, 0.3);
+    border-radius: 1rem;
+    box-shadow: 0 4px 24px rgba(31, 49, 91, 0.08);
+  }
+  
+  /* Watercolor Wash Effect */
+  .watercolor-wash {
+    background: radial-gradient(ellipse at top left, rgba(205, 191, 214, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(46, 124, 131, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #F6F1E8 0%, #FDFBF7 100%);
+  }
+  
+  /* Circular Icon Badge */
+  .icon-badge {
+    @apply rounded-full flex items-center justify-center;
+    background: linear-gradient(135deg, rgba(212, 175, 99, 0.15) 0%, rgba(212, 175, 99, 0.05) 100%);
+    border: 0.5px solid rgba(212, 175, 99, 0.4);
+  }
+  
+  /* Button Variants */
+  .btn-sacred {
+    @apply px-6 py-3 rounded-xl font-medium transition-all duration-300;
+    background: linear-gradient(135deg, #1F315B 0%, #2a3f6e 100%);
+    color: #F6F1E8;
+    border: 0.5px solid rgba(212, 175, 99, 0.3);
+    box-shadow: 0 4px 14px rgba(31, 49, 91, 0.25);
+  }
+  
+  .btn-sacred:hover {
+    background: linear-gradient(135deg, #2a3f6e 0%, #1F315B 100%);
+    box-shadow: 0 6px 20px rgba(31, 49, 91, 0.35);
+    transform: translateY(-1px);
+  }
+  
+  .btn-gold {
+    @apply px-6 py-3 rounded-xl font-medium transition-all duration-300;
+    background: linear-gradient(135deg, #D4AF63 0%, #E8D5A3 50%, #D4AF63 100%);
+    color: #1F315B;
+    border: 0.5px solid rgba(212, 175, 99, 0.5);
+    box-shadow: 0 4px 14px rgba(212, 175, 99, 0.3);
+  }
+  
+  .btn-gold:hover {
+    box-shadow: 0 6px 20px rgba(212, 175, 99, 0.4);
+    transform: translateY(-1px);
+  }
+  
+  /* Mystical Gradient Text */
+  .text-mystical {
+    background: linear-gradient(135deg, #1F315B 0%, #5E3B6C 50%, #2E7C83 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Section Spacing - Air Before Noise */
+  .section-breathing {
+    @apply py-16 md:py-24;
+  }
+  
+  /* Focus States */
+  .focus-sacred:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(212, 175, 99, 0.4);
+    border-color: #D4AF63;
   }
 }
