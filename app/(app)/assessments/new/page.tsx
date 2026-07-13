@@ -128,24 +128,48 @@ export default function NewAssessmentPage() {
             <label htmlFor="businessId" className="block text-sm font-medium text-gray-700 mb-1">
               Business *
             </label>
-            <select
-              id="businessId"
-              value={formData.businessId}
-              onChange={(e) => setFormData({ ...formData, businessId: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              required
-            >
-              <option value="">Select a business</option>
-              {businesses.map((business) => (
-                <option key={business.id} value={business.id}>
-                  {business.name}
-                </option>
-              ))}
-            </select>
-            {businesses.length === 0 && (
-              <p className="text-sm text-orange-600 mt-1">
-                No businesses found. Please create a business first.
-              </p>
+            {businesses.length === 0 ? (
+              /* No businesses - Show CTA to create one */
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-amber-900 mb-1">No Business Found</h4>
+                    <p className="text-sm text-amber-700 mb-3">
+                      You need to create a business profile before you can start an assessment.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => router.push('/businesses/new')}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Create Your First Business
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <select
+                id="businessId"
+                value={formData.businessId}
+                onChange={(e) => setFormData({ ...formData, businessId: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              >
+                <option value="">Select a business</option>
+                {businesses.map((business) => (
+                  <option key={business.id} value={business.id}>
+                    {business.name}
+                  </option>
+                ))}
+              </select>
             )}
           </div>
           

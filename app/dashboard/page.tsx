@@ -4,19 +4,25 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { LogOut, User, Settings, ChevronRight, Sparkles } from 'lucide-react'
+import { LogOut, User, Settings, ChevronRight, Sparkles, Building2, Plus, ArrowRight } from 'lucide-react'
 import DemoBanner from '@/components/demo-banner'
 import { getDemoMode, clearDemoMode, DEMO_USER } from '@/lib/auth'
+
+interface Business {
+  id: string;
+  name: string;
+}
 
 export default function DashboardPage() {
   const router = useRouter()
   const [user, setUser] = useState<{ email: string; name: string } | null>(null)
+  const [businesses, setBusinesses] = useState<Business[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const supabase = createClient()
 
-    // Check if user is authenticated
+    // Check if user is authenticated and fetch businesses
     const checkAuth = async () => {
       const isDemo = getDemoMode()
 
@@ -27,6 +33,8 @@ export default function DashboardPage() {
           email: DEMO_USER.email,
           name: DEMO_USER.user_metadata?.full_name || 'Demo User',
         })
+        // For demo mode, auto-create a sample business if none exists
+        await fetchBusinesses(true)
         setLoading(false)
         return
       }
@@ -46,6 +54,8 @@ export default function DashboardPage() {
           email: authUser.email || '',
           name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User',
         })
+        // Fetch user's businesses
+        await fetchBusinesses(false)
       } else {
         // No user found, redirect to login
         router.push('/login')
@@ -53,6 +63,34 @@ export default function DashboardPage() {
       }
 
       setLoading(false)
+    }
+
+    const fetchBusinesses = async (isDemo: boolean) => {
+      try {
+        if (isDemo) {
+          // For demo mode, check if we have a demo business in localStorage
+          const demoBusiness = localStorage.getItem('tpa_demo_business')
+          if (demoBusiness) {
+            setBusinesses([JSON.parse(demoBusiness)])
+          } else {
+            // Create a demo business
+            const newDemoBusiness = {
+              id: 'demo-business-' + Date.now(),
+              name: 'Demo Business'
+            }
+            localStorage.setItem('tpa_demo_business', JSON.stringify(newDemoBusiness))
+            setBusinesses([newDemoBusiness])
+          }
+        } else {
+          const response = await fetch('/api/businesses')
+          if (response.ok) {
+            const data = await response.json()
+            setBusinesses(data.businesses ?? [])
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching businesses:', err)
+      }
     }
 
     checkAuth()
@@ -120,36 +158,67 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <Link
-            href="/assessments/new"
-            className="group bg-[#FDFBF7] rounded-2xl shadow-sacred border border-[#D4AF63]/20 p-6 hover:shadow-sacred-lg hover:border-[#D4AF63]/40 transition-all duration-300"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-[#2E7C83]/20 to-[#2E7C83]/5 border border-[#2E7C83]/30">
-                <Settings className="w-6 h-6 text-[#2E7C83]" />
+        {/* Quick Actions - Show different state based on whether user has businesses */}
+        {businesses.length === 0 ? (
+          /* Welcome State - No businesses yet */
+          <div className="bg-gradient-to-br from-[#1F315B] to-[#5E3B6C] rounded-2xl shadow-sacred border border-[#D4AF63]/30 p-8 mb-6">
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center bg-[#D4AF63]/20 border border-[#D4AF63]/40 flex-shrink-0">
+                <Building2 className="w-8 h-8 text-[#D4AF63]" />
               </div>
-              <ChevronRight className="w-5 h-5 text-[#1F315B]/30 group-hover:text-[#D4AF63] transition-colors" />
+              <div className="flex-1">
+                <h3 className="font-display text-xl font-bold text-[#F6F1E8] mb-2">Welcome to Profit Architecture!</h3>
+                <p className="font-body text-[#F6F1E8]/80 mb-4">
+                  To get started with your business assessment, you'll need to create a business profile first. 
+                  This helps us tailor the evaluation to your specific needs.
+                </p>
+                <Link
+                  href="/businesses/new"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#D4AF63] text-[#1F315B] rounded-xl font-medium hover:bg-[#D4AF63]/90 transition-all duration-300 font-body"
+                >
+                  <Plus className="w-5 h-5" />
+                  Create Your First Business
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
             </div>
-            <h3 className="font-display text-lg font-semibold text-[#1F315B] mb-1">Start Assessment</h3>
-            <p className="font-body text-[#1F315B]/60 text-sm">Begin your business architecture evaluation</p>
-          </Link>
+          </div>
+        ) : (
+          /* Has businesses - Show normal quick actions */
+          <div className="grid md:grid-cols-2 gap-6">
+            <Link
+              href="/assessments/new"
+              className="group bg-[#FDFBF7] rounded-2xl shadow-sacred border border-[#D4AF63]/20 p-6 hover:shadow-sacred-lg hover:border-[#D4AF63]/40 transition-all duration-300"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-[#2E7C83]/20 to-[#2E7C83]/5 border border-[#2E7C83]/30">
+                  <Settings className="w-6 h-6 text-[#2E7C83]" />
+                </div>
+                <ChevronRight className="w-5 h-5 text-[#1F315B]/30 group-hover:text-[#D4AF63] transition-colors" />
+              </div>
+              <h3 className="font-display text-lg font-semibold text-[#1F315B] mb-1">Start Assessment</h3>
+              <p className="font-body text-[#1F315B]/60 text-sm">Begin your business architecture evaluation</p>
+            </Link>
 
-          <Link
-            href="/profile"
-            className="group bg-[#FDFBF7] rounded-2xl shadow-sacred border border-[#D4AF63]/20 p-6 hover:shadow-sacred-lg hover:border-[#D4AF63]/40 transition-all duration-300"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-[#5E3B6C]/20 to-[#5E3B6C]/5 border border-[#5E3B6C]/30">
-                <User className="w-6 h-6 text-[#5E3B6C]" />
+            <Link
+              href="/businesses"
+              className="group bg-[#FDFBF7] rounded-2xl shadow-sacred border border-[#D4AF63]/20 p-6 hover:shadow-sacred-lg hover:border-[#D4AF63]/40 transition-all duration-300"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-[#5E3B6C]/20 to-[#5E3B6C]/5 border border-[#5E3B6C]/30">
+                  <Building2 className="w-6 h-6 text-[#5E3B6C]" />
+                </div>
+                <ChevronRight className="w-5 h-5 text-[#1F315B]/30 group-hover:text-[#D4AF63] transition-colors" />
               </div>
-              <ChevronRight className="w-5 h-5 text-[#1F315B]/30 group-hover:text-[#D4AF63] transition-colors" />
-            </div>
-            <h3 className="font-display text-lg font-semibold text-[#1F315B] mb-1">Your Profile</h3>
-            <p className="font-body text-[#1F315B]/60 text-sm">Manage your account settings and preferences</p>
-          </Link>
-        </div>
+              <h3 className="font-display text-lg font-semibold text-[#1F315B] mb-1">Your Businesses</h3>
+              <p className="font-body text-[#1F315B]/60 text-sm">
+                {businesses.length === 1 
+                  ? `Manage ${businesses[0].name}` 
+                  : `Manage your ${businesses.length} businesses`}
+              </p>
+            </Link>
+          </div>
+        )}
 
         {/* Status */}
         <div className="mt-8 bg-gradient-to-r from-[#1F315B]/5 to-[#5E3B6C]/5 border border-[#D4AF63]/20 rounded-2xl p-6">
