@@ -139,7 +139,7 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
     name: initialData?.name || '',
     alias: initialData?.alias || '',
     organization_type: initialData?.organization_type || '',
-    organization_type_category: initialData?.organization_type_category || '',
+    organization_type_category: initialData?.organization_type_category || undefined as OrganizationTypeCategory | undefined,
     organization_type_other: initialData?.organization_type_other || '',
     industry_category: initialData?.industry_category || '',
     industry_subcategory: initialData?.industry_subcategory || '',
