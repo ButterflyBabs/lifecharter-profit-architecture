@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { BusinessForm } from '@/components/business/business-form';
 import { ArrowLeft } from 'lucide-react';
+import { getDemoMode } from '@/lib/auth';
 
 export default function NewBusinessPage() {
   const router = useRouter();
@@ -37,7 +38,41 @@ export default function NewBusinessPage() {
     setIsSubmitting(true);
 
     try {
-      // Get tenant_id from user's active tenant (simplified - in real app, this would come from context)
+      // Check if we're in demo mode
+      const isDemo = getDemoMode();
+      
+      if (isDemo) {
+        // Demo mode: store business in localStorage
+        const demoBusiness = {
+          id: 'demo-business-' + Date.now(),
+          name: data.name,
+          alias: data.alias,
+          organization_type: data.organization_type,
+          organization_type_category: data.organization_type_category,
+          organization_type_other: data.organization_type_other,
+          industry_category: data.industry_category,
+          industry_subcategory: data.industry_subcategory,
+          industry_other: data.industry_other,
+          street_address_line_1: data.street_address_line_1,
+          street_address_line_2: data.street_address_line_2,
+          address_city: data.address_city,
+          address_state: data.address_state,
+          address_zip_code: data.address_zip_code,
+          years_operating: data.years_operating,
+          goals: data.goals,
+          concerns: data.concerns,
+          created_at: new Date().toISOString(),
+        };
+        
+        // Store in localStorage for demo mode
+        localStorage.setItem('tpa_demo_business', JSON.stringify(demoBusiness));
+        
+        // Redirect to the business detail page
+        router.push(`/businesses/${demoBusiness.id}`);
+        return;
+      }
+
+      // Regular mode: call the API
       const response = await fetch('/api/businesses', {
         method: 'POST',
         headers: {

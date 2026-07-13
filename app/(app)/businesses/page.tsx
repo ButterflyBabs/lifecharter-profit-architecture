@@ -1,16 +1,13 @@
 // app/(app)/businesses/page.tsx
-// Business list page - LifeCharter Brand Styling
+// Business list page - supports both real and demo mode
 
-import { Metadata } from 'next';
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/server';
-import { Plus, Search, Building2 } from 'lucide-react';
+import { Plus, Search, Building2, Loader2 } from 'lucide-react';
 import { BusinessCard } from '@/components/business/business-card';
-
-export const metadata: Metadata = {
-  title: 'Businesses | Profit Architecture',
-  description: 'Manage your businesses',
-};
+import { getDemoMode } from '@/lib/auth';
 
 interface Business {
   id: string;
@@ -20,50 +17,78 @@ interface Business {
   industry?: string;
   status: string;
   created_at: string;
-  tpa_business_assignments?: {
-    id: string;
-    role: string;
-    user?: {
-      display_name?: string;
-      email?: string;
+}
+
+export default function BusinessesPage() {
+  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    const fetchBusinesses = async () => {
+      try {
+        const isDemo = getDemoMode();
+        
+        if (isDemo) {
+          // Demo mode: get business from localStorage
+          const demoBusinessJson = localStorage.getItem('tpa_demo_business');
+          if (demoBusinessJson) {
+            const demoBusiness = JSON.parse(demoBusinessJson);
+            setBusinesses([{
+              id: demoBusiness.id,
+              name: demoBusiness.name,
+              alias: demoBusiness.alias,
+              organization_type: demoBusiness.organization_type,
+              industry: demoBusiness.industry_category,
+              status: 'active',
+              created_at: demoBusiness.created_at || new Date().toISOString(),
+            }]);
+          } else {
+            setBusinesses([]);
+          }
+          setLoading(false);
+          return;
+        }
+
+        // Real mode: fetch from API
+        const response = await fetch('/api/businesses');
+        if (response.ok) {
+          const data = await response.json();
+          setBusinesses(data.businesses || []);
+        } else {
+          console.error('Failed to fetch businesses');
+          setBusinesses([]);
+        }
+      } catch (err) {
+        console.error('Error fetching businesses:', err);
+        setBusinesses([]);
+      } finally {
+        setLoading(false);
+      }
     };
-  }[];
-  tpa_business_classifications?: {
-    primary_pathway: string;
-    confidence: number;
-  }[];
-}
 
-async function getBusinesses(): Promise<Business[]> {
-  const supabase = createClient();
-  
-  const { data: businesses, error } = await supabase
-    .from('tpa_businesses')
-    .select(`
-      *,
-      tpa_business_assignments(
-        id,
-        role,
-        user:tpa_profiles(display_name, email)
-      ),
-      tpa_business_classifications(
-        primary_pathway,
-        confidence
-      )
-    `)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false });
+    fetchBusinesses();
+  }, []);
 
-  if (error) {
-    console.error('Error fetching businesses:', error);
-    return [];
+  const filteredBusinesses = businesses.filter(b => 
+    b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (b.alias && b.alias.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#F6F1E8] via-[#FDFBF7] to-[#F6F1E8]">
+        <div className="container mx-auto py-8 px-4">
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="flex items-center gap-2 text-[#1F315B]/60">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Loading...
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
-
-  return businesses || [];
-}
-
-export default async function BusinessesPage() {
-  const businesses = await getBusinesses();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F6F1E8] via-[#FDFBF7] to-[#F6F1E8]">
@@ -93,32 +118,40 @@ export default async function BusinessesPage() {
             <input
               type="text"
               placeholder="Search businesses..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-4 py-3 rounded-xl border border-[#D4AF63]/30 bg-[#FDFBF7] text-[#1F315B] placeholder-[#1F315B]/40 focus:outline-none focus:ring-2 focus:ring-[#D4AF63]/50 focus:border-[#D4AF63] transition-all font-body"
             />
           </div>
         </div>
 
         {/* Business grid */}
-        {businesses.length === 0 ? (
+        {filteredBusinesses.length === 0 ? (
           <div className="text-center py-16 bg-[#FDFBF7] rounded-2xl border-2 border-dashed border-[#D4AF63]/30">
             <div className="mx-auto w-16 h-16 rounded-full bg-[#D4AF63]/10 flex items-center justify-center mb-4 border border-[#D4AF63]/20">
               <Building2 className="h-8 w-8 text-[#D4AF63]" />
             </div>
-            <h3 className="font-display text-xl font-medium text-[#1F315B] mb-2">No businesses yet</h3>
+            <h3 className="font-display text-xl font-medium text-[#1F315B] mb-2">
+              {searchQuery ? 'No businesses found' : 'No businesses yet'}
+            </h3>
             <p className="font-body text-[#1F315B]/60 mb-6">
-              Get started by adding your first business
+              {searchQuery 
+                ? 'Try adjusting your search' 
+                : 'Get started by adding your first business'}
             </p>
-            <Link 
-              href="/businesses/new"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#D4AF63] to-[#E8D5A3] text-[#1F315B] rounded-xl font-medium hover:shadow-xl hover:shadow-[#D4AF63]/30 transition-all duration-300 font-body border border-[#D4AF63]/50"
-            >
-              <Plus className="w-4 h-4" />
-              Add Business
-            </Link>
+            {!searchQuery && (
+              <Link 
+                href="/businesses/new"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#D4AF63] to-[#E8D5A3] text-[#1F315B] rounded-xl font-medium hover:shadow-xl hover:shadow-[#D4AF63]/30 transition-all duration-300 font-body border border-[#D4AF63]/50"
+              >
+                <Plus className="w-4 h-4" />
+                Add Business
+              </Link>
+            )}
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {businesses.map((business) => (
+            {filteredBusinesses.map((business) => (
               <BusinessCard key={business.id} business={business} />
             ))}
           </div>
