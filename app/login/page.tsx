@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { DEMO_CREDENTIALS, DEMO_MODE_ENABLED, setDemoMode } from '@/lib/auth'
+import { Sparkles } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -23,6 +25,14 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    await performLogin(formData.email, formData.password)
+  }
+
+  const handleDemoLogin = async () => {
+    await performLogin(DEMO_CREDENTIALS.email, DEMO_CREDENTIALS.password, true)
+  }
+
+  const performLogin = async (email: string, password: string, isDemo: boolean = false) => {
     setLoading(true)
     setError('')
 
@@ -32,13 +42,18 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ email, password }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
         throw new Error(data.error || 'Login failed')
+      }
+
+      // Set demo mode flag if this is a demo login
+      if (isDemo || data.demoMode) {
+        setDemoMode(true)
       }
 
       // Set the session in the client
@@ -133,6 +148,24 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* Demo Login Button */}
+          {DEMO_MODE_ENABLED && (
+            <div className="mt-4 pt-4 border-t border-[#D4AF63]/20">
+              <button
+                type="button"
+                onClick={handleDemoLogin}
+                disabled={loading}
+                className="w-full px-4 py-3 bg-[#D4AF63]/10 hover:bg-[#D4AF63]/20 text-[#1F315B] rounded-xl font-semibold transition-all duration-300 font-body disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-[#D4AF63]/40"
+              >
+                <Sparkles className="w-4 h-4" />
+                {loading ? 'Signing in...' : 'Try Demo Mode'}
+              </button>
+              <p className="mt-2 text-center text-xs font-body text-[#1F315B]/50">
+                Preview the platform without creating an account
+              </p>
+            </div>
+          )}
+
           <div className="mt-6 text-center">
             <p className="text-sm font-body text-[#1F315B]/70">
               Don&apos;t have an account?{' '}
@@ -141,6 +174,17 @@ export default function LoginPage() {
               </Link>
             </p>
           </div>
+          
+          {/* Demo credentials hint */}
+          {DEMO_MODE_ENABLED && (
+            <div className="mt-4 p-3 bg-[#D4AF63]/5 rounded-lg border border-[#D4AF63]/20">
+              <p className="text-xs font-body text-[#1F315B]/60 text-center">
+                <span className="font-medium">Demo credentials:</span><br />
+                Email: {DEMO_CREDENTIALS.email}<br />
+                Password: {DEMO_CREDENTIALS.password}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="text-center">

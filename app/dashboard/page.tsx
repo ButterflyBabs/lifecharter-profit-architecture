@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { LogOut, User, Settings, ChevronRight, Sparkles } from 'lucide-react'
+import DemoBanner from '@/components/demo-banner'
+import { getDemoMode, clearDemoMode } from '@/lib/auth'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -42,6 +44,7 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
+    clearDemoMode()
     router.push('/login')
   }
 
@@ -58,6 +61,9 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#F6F1E8] via-[#FDFBF7] to-[#F6F1E8]">
+      {/* Demo Banner */}
+      <DemoBanner />
+      
       {/* Header */}
       <header className="bg-[#F6F1E8]/80 backdrop-blur-sm border-b border-[#D4AF63]/20 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
