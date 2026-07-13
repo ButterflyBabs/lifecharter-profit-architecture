@@ -255,7 +255,7 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="alias">Alias (optional)</Label>
+            <Label htmlFor="alias">DBA (Doing Business As) (optional)</Label>
             <Input
               id="alias"
               value={formData.alias}
