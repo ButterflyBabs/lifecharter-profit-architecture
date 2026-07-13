@@ -16,14 +16,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Plus, X } from 'lucide-react';
-import { industries, usStates } from '@/lib/business/types';
+import { industryCategories, usStates } from '@/lib/business/types';
 
 interface BusinessFormProps {
   initialData?: {
     name?: string;
     alias?: string;
     organization_type?: string;
-    industry?: string;
+    industry_category?: string;
+    industry_subcategory?: string;
     industry_other?: string;
     location_city?: string;
     location_state?: string;
@@ -35,7 +36,8 @@ interface BusinessFormProps {
     name: string;
     alias?: string;
     organization_type: string;
-    industry?: string;
+    industry_category?: string;
+    industry_subcategory?: string;
     industry_other?: string;
     location_city?: string;
     location_state?: string;
@@ -51,7 +53,8 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
     name: initialData?.name || '',
     alias: initialData?.alias || '',
     organization_type: initialData?.organization_type || '',
-    industry: initialData?.industry || '',
+    industry_category: initialData?.industry_category || '',
+    industry_subcategory: initialData?.industry_subcategory || '',
     industry_other: initialData?.industry_other || '',
     location_city: initialData?.location_city || '',
     location_state: initialData?.location_state || '',
@@ -59,6 +62,12 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
     goals: initialData?.goals || [],
     concerns: initialData?.concerns || [],
   });
+
+  // Get available subcategories based on selected category
+  const selectedCategory = industryCategories.find(
+    (cat) => cat.value === formData.industry_category
+  );
+  const availableSubcategories = selectedCategory?.subcategories || [];
 
   const [newGoal, setNewGoal] = useState('');
   const [newGoalPriority, setNewGoalPriority] = useState('medium');
@@ -161,19 +170,57 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
             </Select>
           </div>
 
+        </div>
+
+        {/* Industry - Two-level selection */}
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="industry">Industry</Label>
+            <Label htmlFor="industry_category">Industry Category</Label>
             <Select
-              value={formData.industry}
-              onValueChange={(value) => setFormData({ ...formData, industry: value })}
+              value={formData.industry_category}
+              onValueChange={(value) =>
+                setFormData({
+                  ...formData,
+                  industry_category: value,
+                  industry_subcategory: '', // Reset subcategory when category changes
+                })
+              }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select industry" />
+                <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                {industries.map((industry) => (
-                  <SelectItem key={industry.value} value={industry.value}>
-                    {industry.label}
+                {industryCategories.map((category) => (
+                  <SelectItem key={category.value} value={category.value}>
+                    {category.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="industry_subcategory">Industry Subcategory</Label>
+            <Select
+              value={formData.industry_subcategory}
+              onValueChange={(value) =>
+                setFormData({ ...formData, industry_subcategory: value })
+              }
+              disabled={!formData.industry_category}
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={
+                    formData.industry_category
+                      ? 'Select subcategory'
+                      : 'Select category first'
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {availableSubcategories.map((sub) => (
+                  <SelectItem key={sub.value} value={sub.value}>
+                    {sub.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -181,7 +228,7 @@ export function BusinessForm({ initialData, onSubmit, isSubmitting }: BusinessFo
           </div>
         </div>
 
-        {formData.industry === 'other' && (
+        {formData.industry_category === 'other' && (
           <div className="space-y-2">
             <Label htmlFor="industry_other">Other Industry</Label>
             <Input

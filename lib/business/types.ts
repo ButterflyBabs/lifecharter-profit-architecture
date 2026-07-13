@@ -259,24 +259,215 @@ export const classificationWizardSteps: ClassificationWizardStep[] = [
   },
 ];
 
-// Industry options
-export const industries = [
-  { value: 'technology', label: 'Technology' },
-  { value: 'healthcare', label: 'Healthcare' },
-  { value: 'finance', label: 'Finance & Insurance' },
-  { value: 'retail', label: 'Retail & E-commerce' },
-  { value: 'manufacturing', label: 'Manufacturing' },
-  { value: 'professional_services', label: 'Professional Services' },
-  { value: 'education', label: 'Education' },
-  { value: 'nonprofit_social', label: 'Nonprofit & Social Services' },
-  { value: 'hospitality', label: 'Hospitality & Food Service' },
-  { value: 'construction', label: 'Construction & Real Estate' },
-  { value: 'arts_entertainment', label: 'Arts & Entertainment' },
-  { value: 'agriculture', label: 'Agriculture' },
-  { value: 'transportation', label: 'Transportation & Logistics' },
-  { value: 'energy', label: 'Energy & Utilities' },
-  { value: 'other', label: 'Other (specify)' },
+// Industry category type
+export interface IndustryCategory {
+  value: string;
+  label: string;
+  subcategories: IndustrySubcategory[];
+}
+
+export interface IndustrySubcategory {
+  value: string;
+  label: string;
+}
+
+// Industry options with categories and subcategories
+export const industryCategories: IndustryCategory[] = [
+  {
+    value: 'coaching',
+    label: 'Coaching',
+    subcategories: [
+      { value: 'life_coaching', label: 'Life Coaching' },
+      { value: 'spiritual_coaching', label: 'Spiritual Coaching' },
+      { value: 'executive_coaching', label: 'Executive Coaching' },
+      { value: 'leadership_coaching', label: 'Leadership Coaching' },
+      { value: 'business_coaching', label: 'Business Coaching' },
+      { value: 'career_coaching', label: 'Career Coaching' },
+      { value: 'health_wellness_coaching', label: 'Health & Wellness Coaching' },
+      { value: 'fitness_coaching', label: 'Fitness Coaching' },
+      { value: 'nutrition_coaching', label: 'Nutrition Coaching' },
+      { value: 'relationship_coaching', label: 'Relationship Coaching' },
+      { value: 'parenting_coaching', label: 'Parenting Coaching' },
+      { value: 'performance_coaching', label: 'Performance Coaching' },
+      { value: 'mindset_coaching', label: 'Mindset Coaching' },
+      { value: 'transformational_coaching', label: 'Transformational Coaching' },
+      { value: 'success_coaching', label: 'Success Coaching' },
+      { value: 'financial_coaching', label: 'Financial Coaching' },
+      { value: 'sales_coaching', label: 'Sales Coaching' },
+      { value: 'marketing_coaching', label: 'Marketing Coaching' },
+      { value: 'team_coaching', label: 'Team Coaching' },
+      { value: 'group_coaching', label: 'Group Coaching' },
+      { value: 'online_coaching', label: 'Online Coaching' },
+      { value: 'hybrid_coaching', label: 'Hybrid Coaching (Online + In-Person)' },
+    ],
+  },
+  {
+    value: 'professional_services',
+    label: 'Professional Services',
+    subcategories: [
+      { value: 'consulting', label: 'Consulting' },
+      { value: 'agency', label: 'Agency' },
+      { value: 'accounting', label: 'Accounting & Bookkeeping' },
+      { value: 'legal', label: 'Legal Services' },
+      { value: 'marketing_services', label: 'Marketing Services' },
+      { value: 'hr_services', label: 'HR & Recruitment' },
+      { value: 'it_services', label: 'IT Services' },
+    ],
+  },
+  {
+    value: 'technology',
+    label: 'Technology / SaaS',
+    subcategories: [
+      { value: 'software', label: 'Software Development' },
+      { value: 'saas', label: 'SaaS' },
+      { value: 'ai_ml', label: 'AI & Machine Learning' },
+      { value: 'cybersecurity', label: 'Cybersecurity' },
+      { value: 'data_analytics', label: 'Data & Analytics' },
+      { value: 'web_mobile', label: 'Web & Mobile Apps' },
+      { value: 'cloud_services', label: 'Cloud Services' },
+      { value: 'hardware', label: 'Hardware & Devices' },
+    ],
+  },
+  {
+    value: 'ecommerce_retail',
+    label: 'E-commerce / Retail',
+    subcategories: [
+      { value: 'online_store', label: 'Online Store' },
+      { value: 'physical_retail', label: 'Physical Retail' },
+      { value: 'omnichannel', label: 'Omnichannel Retail' },
+      { value: 'dropshipping', label: 'Dropshipping' },
+      { value: 'wholesale', label: 'Wholesale' },
+      { value: 'marketplace', label: 'Marketplace' },
+    ],
+  },
+  {
+    value: 'healthcare_wellness',
+    label: 'Healthcare / Wellness',
+    subcategories: [
+      { value: 'medical_practice', label: 'Medical Practice' },
+      { value: 'mental_health', label: 'Mental Health Services' },
+      { value: 'wellness_services', label: 'Wellness Services' },
+      { value: 'alternative_medicine', label: 'Alternative Medicine' },
+      { value: 'medical_devices', label: 'Medical Devices' },
+      { value: 'health_tech', label: 'Health Tech' },
+    ],
+  },
+  {
+    value: 'education_training',
+    label: 'Education / Training',
+    subcategories: [
+      { value: 'k12', label: 'K-12 Education' },
+      { value: 'higher_ed', label: 'Higher Education' },
+      { value: 'corporate_training', label: 'Corporate Training' },
+      { value: 'online_courses', label: 'Online Courses' },
+      { value: 'tutoring', label: 'Tutoring' },
+      { value: 'professional_development', label: 'Professional Development' },
+    ],
+  },
+  {
+    value: 'creative_services',
+    label: 'Creative Services',
+    subcategories: [
+      { value: 'design', label: 'Design Services' },
+      { value: 'photography', label: 'Photography' },
+      { value: 'video_production', label: 'Video Production' },
+      { value: 'writing_editing', label: 'Writing & Editing' },
+      { value: 'music_audio', label: 'Music & Audio' },
+      { value: 'art_crafts', label: 'Art & Crafts' },
+    ],
+  },
+  {
+    value: 'finance_insurance',
+    label: 'Financial Services',
+    subcategories: [
+      { value: 'financial_planning', label: 'Financial Planning' },
+      { value: 'investment', label: 'Investment Services' },
+      { value: 'insurance', label: 'Insurance' },
+      { value: 'banking', label: 'Banking' },
+      { value: 'fintech', label: 'Fintech' },
+      { value: 'accounting_services', label: 'Accounting Services' },
+    ],
+  },
+  {
+    value: 'real_estate',
+    label: 'Real Estate',
+    subcategories: [
+      { value: 'residential_sales', label: 'Residential Sales' },
+      { value: 'commercial_sales', label: 'Commercial Sales' },
+      { value: 'property_management', label: 'Property Management' },
+      { value: 'real_estate_investing', label: 'Real Estate Investing' },
+      { value: 'development', label: 'Development' },
+    ],
+  },
+  {
+    value: 'hospitality_events',
+    label: 'Hospitality',
+    subcategories: [
+      { value: 'restaurant', label: 'Restaurant' },
+      { value: 'catering', label: 'Catering' },
+      { value: 'hotel_lodging', label: 'Hotel & Lodging' },
+      { value: 'events_planning', label: 'Event Planning' },
+      { value: 'travel_tourism', label: 'Travel & Tourism' },
+    ],
+  },
+  {
+    value: 'manufacturing',
+    label: 'Manufacturing',
+    subcategories: [
+      { value: 'consumer_goods', label: 'Consumer Goods' },
+      { value: 'industrial', label: 'Industrial Manufacturing' },
+      { value: 'food_beverage', label: 'Food & Beverage' },
+      { value: 'textiles', label: 'Textiles & Apparel' },
+      { value: 'electronics', label: 'Electronics' },
+    ],
+  },
+  {
+    value: 'nonprofit_social',
+    label: 'Non-profit / Social Impact',
+    subcategories: [
+      { value: 'charity', label: 'Charity' },
+      { value: 'foundation', label: 'Foundation' },
+      { value: 'advocacy', label: 'Advocacy' },
+      { value: 'social_enterprise', label: 'Social Enterprise' },
+      { value: 'community_org', label: 'Community Organization' },
+    ],
+  },
+  {
+    value: 'construction',
+    label: 'Construction / Trades',
+    subcategories: [
+      { value: 'residential_construction', label: 'Residential Construction' },
+      { value: 'commercial_construction', label: 'Commercial Construction' },
+      { value: 'renovation', label: 'Renovation & Remodeling' },
+      { value: 'specialty_trades', label: 'Specialty Trades' },
+    ],
+  },
+  {
+    value: 'arts_entertainment',
+    label: 'Arts & Entertainment',
+    subcategories: [
+      { value: 'performing_arts', label: 'Performing Arts' },
+      { value: 'visual_arts', label: 'Visual Arts' },
+      { value: 'media_publishing', label: 'Media & Publishing' },
+      { value: 'entertainment', label: 'Entertainment' },
+    ],
+  },
+  {
+    value: 'other',
+    label: 'Other',
+    subcategories: [
+      { value: 'other_specific', label: 'Other (specify below)' },
+    ],
+  },
 ];
+
+// Flat list for backwards compatibility (derived from categories)
+export const industries = industryCategories.flatMap(cat =>
+  cat.subcategories.map(sub => ({
+    value: `${cat.value}_${sub.value}`,
+    label: `${cat.label} - ${sub.label}`,
+  }))
+);
 
 // US States
 export const usStates = [

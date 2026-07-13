@@ -18,7 +18,8 @@ export default function NewBusinessPage() {
     name: string;
     alias?: string;
     organization_type: string;
-    industry?: string;
+    industry_category?: string;
+    industry_subcategory?: string;
     industry_other?: string;
     location_city?: string;
     location_state?: string;

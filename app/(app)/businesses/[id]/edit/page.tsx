@@ -46,7 +46,8 @@ export default function EditBusinessPage({ params }: PageProps) {
     name: string;
     alias?: string;
     organization_type: string;
-    industry?: string;
+    industry_category?: string;
+    industry_subcategory?: string;
     industry_other?: string;
     location_city?: string;
     location_state?: string;
@@ -126,7 +127,12 @@ export default function EditBusinessPage({ params }: PageProps) {
             name: business.name,
             alias: business.alias,
             organization_type: business.organization_type,
-            industry: business.industry,
+            industry_category: business.industry?.includes(':')
+              ? business.industry.split(':')[0]
+              : business.industry,
+            industry_subcategory: business.industry?.includes(':')
+              ? business.industry.split(':')[1]
+              : undefined,
             industry_other: business.industry_other,
             location_city: business.location_city,
             location_state: business.location_state,

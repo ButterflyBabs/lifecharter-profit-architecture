@@ -10,7 +10,9 @@ const updateBusinessSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   alias: z.string().max(255).optional().nullable(),
   organization_type: z.enum(['for_profit', 'nonprofit', 'social_enterprise', 'cooperative']).optional(),
-  industry: z.string().optional().nullable(),
+  industry: z.string().optional().nullable(), // Legacy field
+  industry_category: z.string().optional(),
+  industry_subcategory: z.string().optional(),
   industry_other: z.string().optional().nullable(),
   location_city: z.string().optional().nullable(),
   location_state: z.string().optional().nullable(),
@@ -126,6 +128,14 @@ export async function PUT(
       return NextResponse.json({ error: 'Failed to fetch business' }, { status: 500 });
     }
 
+    // Build industry field from category and subcategory if provided
+    let industryValue = data.industry;
+    if (data.industry_category) {
+      industryValue = data.industry_subcategory
+        ? `${data.industry_category}:${data.industry_subcategory}`
+        : data.industry_category;
+    }
+
     // Update business
     const updateData: Record<string, unknown> = {
       updated_by: user.id,
@@ -135,7 +145,7 @@ export async function PUT(
     if (data.name !== undefined) updateData.name = data.name;
     if (data.alias !== undefined) updateData.alias = data.alias;
     if (data.organization_type !== undefined) updateData.organization_type = data.organization_type;
-    if (data.industry !== undefined) updateData.industry = data.industry;
+    if (industryValue !== undefined) updateData.industry = industryValue;
     if (data.industry_other !== undefined) updateData.industry_other = data.industry_other;
     if (data.location_city !== undefined) updateData.location_city = data.location_city;
     if (data.location_state !== undefined) updateData.location_state = data.location_state;

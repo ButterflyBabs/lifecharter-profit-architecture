@@ -11,7 +11,9 @@ const createBusinessSchema = z.object({
   name: z.string().min(1).max(255),
   alias: z.string().max(255).optional(),
   organization_type: z.enum(['for_profit', 'nonprofit', 'social_enterprise', 'cooperative']),
-  industry: z.string().optional(),
+  industry: z.string().optional(), // Legacy field - kept for backwards compatibility
+  industry_category: z.string().optional(),
+  industry_subcategory: z.string().optional(),
   industry_other: z.string().optional(),
   location_city: z.string().optional(),
   location_state: z.string().optional(),
@@ -130,6 +132,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Access denied to tenant' }, { status: 403 });
     }
 
+    // Build industry field from category and subcategory
+    // Store as "category:subcategory" format for easy parsing
+    const industryValue = data.industry_category
+      ? data.industry_subcategory
+        ? `${data.industry_category}:${data.industry_subcategory}`
+        : data.industry_category
+      : data.industry; // Fallback to legacy industry field
+
     // Create business
     const { data: business, error: createError } = await supabase
       .from('tpa_businesses')
@@ -138,7 +148,7 @@ export async function POST(request: NextRequest) {
         name: data.name,
         alias: data.alias,
         organization_type: data.organization_type,
-        industry: data.industry,
+        industry: industryValue,
         industry_other: data.industry_other,
         location_city: data.location_city,
         location_state: data.location_state,
